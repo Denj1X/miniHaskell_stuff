@@ -4,6 +4,8 @@ import System.IO
 import System.Console.Isocline
 
 import Exp
+import Eval
+import Sugar
 import Parsing
 import Printing
 import REPLCommand
