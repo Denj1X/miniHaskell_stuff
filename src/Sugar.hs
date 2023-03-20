@@ -4,13 +4,13 @@ module Sugar where
 import Exp
 
 desugarVar :: Var -> IndexedVar
-desugarVar = undefined
+desugarVar v = makeIndexedVar (getVar v)
 
 -- >>> desugarVar (Var "x")
 -- IndexedVar {ivName = "x", ivCount = 0}
 
 sugarVar :: IndexedVar -> Var
-sugarVar = undefined
+sugarVarv = 
 
 -- >>> sugarVar (IndexedVar "x" 0)
 -- Var {getVar = "x"}

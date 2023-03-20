@@ -27,7 +27,6 @@ library
   exposed-modules:
       Eval
       Exp
-      Lab1
       Lab2
       Lib
       Parsing
