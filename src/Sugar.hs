@@ -10,7 +10,7 @@ desugarVar v = makeIndexedVar (getVar v)
 -- IndexedVar {ivName = "x", ivCount = 0}
 
 sugarVar :: IndexedVar -> Var
-sugarVarv = 
+sugarVar = undefined
 
 -- >>> sugarVar (IndexedVar "x" 0)
 -- Var {getVar = "x"}
@@ -26,7 +26,9 @@ succExp = X (makeIndexedVar "S")  -- S :: Natural -> Natural     successor
 fixExp = X (makeIndexedVar "fix") -- fix :: (a -> a) -> a        fixpoint fn.
 
 desugarExp :: ComplexExp -> Exp
-desugarExp = undefined
+desugarExp (CX v) = X (desugarVar v)
+desugarExp (CLam v c) = Lam (desugarVar v) (desugarExp c)
+desugarExp (CApp c1 c2) = App (desugarExp c1) (desugarExp c2)
 
 -- >>> desugarExp (CApp (CLam (Var "x") (CX (Var "y"))) (CX (Var "z"))) 
 -- App (Lam (IndexedVar {ivName = "x", ivCount = 0}) (X (IndexedVar {ivName = "y", ivCount = 0}))) (X (IndexedVar {ivName = "z", ivCount = 0}))
