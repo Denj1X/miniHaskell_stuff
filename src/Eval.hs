@@ -45,7 +45,10 @@ occursFree v exp = elem v (freeVars exp)
 -- True
 
 freshVar :: IndexedVar -> [IndexedVar] -> IndexedVar
-freshVar = undefined
+freshVar v vs = if elem (IndexedVar (ivName v) (ivCount v + 1)) vs 
+    then freshVar (IndexedVar (ivName v) (ivCount v + 1)) vs
+    else (IndexedVar (ivName v) (ivCount v + 1))
+
 
 -- >>> freshVar (makeIndexedVar "x") [makeIndexedVar "x"]
 -- IndexedVar {ivName = "x", ivCount = 1}
@@ -54,7 +57,9 @@ freshVar = undefined
 -- IndexedVar {ivName = "x", ivCount = 2}
 
 renameVar :: IndexedVar -> IndexedVar -> Exp -> Exp
-renameVar toReplace replacement = undefined
+renameVar toReplace replacement (X var) = if var == toReplace then X replacement else X var
+renameVar toReplace replacement (Lam var exp) = Lam (if var == toReplace then replacement else var) (renameVar toReplace replacement exp)
+renameVar toReplace replacement (App exp1 exp2) = App (renameVar toReplace replacement exp1) (renameVar toReplace replacement exp2)
 
 -- >>> renameVar (IndexedVar {ivName = "x", ivCount = 0}) (IndexedVar {ivName = "z", ivCount = 0}) (App (Lam (IndexedVar {ivName = "x", ivCount = 0}) (X (IndexedVar {ivName = "x", ivCount = 0}))) (X (IndexedVar {ivName = "x", ivCount = 0})))
 -- App (Lam (IndexedVar {ivName = "z", ivCount = 0}) (X (IndexedVar {ivName = "z", ivCount = 0}))) (X (IndexedVar {ivName = "z", ivCount = 0}))
