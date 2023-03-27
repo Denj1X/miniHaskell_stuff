@@ -5,7 +5,9 @@ import Exp
 import Data.List ( union, delete )
 
 vars :: Exp -> [IndexedVar]
-vars = undefined
+vars (X v) = [v]
+vars (Lam v c) = if elem v (vars c) then vars c else v : vars c
+vars (App c1 c2) = union (vars c1) (vars c2) 
 
 -- >>> vars (Lam (makeIndexedVar "x") (X (makeIndexedVar "y")))
 -- [IndexedVar {ivName = "x", ivCount = 0},IndexedVar {ivName = "y", ivCount = 0}]
@@ -17,7 +19,9 @@ vars = undefined
 -- [IndexedVar {ivName = "x", ivCount = 0}]
 
 freeVars :: Exp -> [IndexedVar]
-freeVars = undefined
+freeVars (X v) = [v]
+freeVars (Lam v c) = filter (not . (==) v) (vars c)
+freeVars (App c1 c2) = (freeVars c1) ++ (freeVars c2)
 
 -- >>> freeVars (Lam (makeIndexedVar "x") (X (makeIndexedVar "y")))
 -- [IndexedVar {ivName = "y", ivCount = 0}]
@@ -32,7 +36,7 @@ freeVars = undefined
 -- []
 
 occursFree :: IndexedVar -> Exp -> Bool
-occursFree = undefined
+occursFree v exp = elem v (freeVars exp)
 
 -- >>> makeIndexedVar "x" `occursFree` Lam (makeIndexedVar "x") (X (makeIndexedVar "y"))
 -- False
