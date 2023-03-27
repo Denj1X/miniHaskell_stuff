@@ -66,7 +66,8 @@ renameVar toReplace replacement (App exp1 exp2) = App (renameVar toReplace repla
 
 substitute :: IndexedVar -> Exp -> Exp -> Exp
 substitute toReplace replacement (X var) = if var == toReplace then replacement else X var
-substitute toReplace replacement (Lam v exp) = undefined
+substitute toReplace replacement (Lam v exp) = Lam (if var == toReplace then replacement else var) (substituter toReplace replacement exp)
+substitute toReplace replacement (App exp1 exp2) = App (substitute toReplace replacement exp1) (substitute toReplace replacement exp2)
 
 -- >>> substitute (IndexedVar {ivName = "x", ivCount = 0}) (X (IndexedVar {ivName = "z", ivCount = 0})) (App (Lam (IndexedVar {ivName = "x", ivCount = 0}) (X (IndexedVar {ivName = "x", ivCount = 0}))) (X (IndexedVar {ivName = "x", ivCount = 0})))
 -- App (Lam (IndexedVar {ivName = "x", ivCount = 0}) (X (IndexedVar {ivName = "x", ivCount = 0}))) (X (IndexedVar {ivName = "z", ivCount = 0}))
