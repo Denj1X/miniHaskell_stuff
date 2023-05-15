@@ -1,11 +1,14 @@
 module MaybeClass where
 
-import Prelude (Show(..), (<>), undefined) -- for show instances
-import qualified Data.Maybe as Maybe
-import qualified Data.Bool as Bool -- for testing
+-- for show instances
 
-import MyPrelude
+-- for testing
+
 import BoolClass
+import qualified Data.Bool as Bool
+import qualified Data.Maybe as Maybe
+import MyPrelude
+import Prelude (Show (..), undefined, (<>))
 
 -- | The class of Maybe-like types (types having a notion of
 -- 'nothing' (no value) and 'just' (some value) and way to
@@ -19,7 +22,7 @@ class MaybeClass m where
   just :: a -> m a
   maybe :: b -> (a -> b) -> m a -> b
 
-instance MaybeClass Maybe.Maybe where 
+instance MaybeClass Maybe.Maybe where
   nothing = Maybe.Nothing
   just = Maybe.Just
   maybe = Maybe.maybe
@@ -28,7 +31,7 @@ instance MaybeClass Maybe.Maybe where
 -- If the 'MaybeClass' is 'nothing', it returns the default value;
 -- otherwise, it returns the value contained in the 'MaybeClass'.
 fromMaybe :: (MaybeClass m) => a -> m a -> a
-fromMaybe d ma = maybe d id ma 
+fromMaybe a = maybe a id
 
 -- >>> fromMaybe true (just false :: Maybe.Maybe Bool.Bool)
 -- False
@@ -38,34 +41,34 @@ fromMaybe d ma = maybe d id ma
 
 -- | The isNothing function returns 'true' iff its argument is 'nothing'.
 isNothing :: (MaybeClass m, BoolClass b) => m a -> b
-isNothing = maybe true (\x -> false)
+isNothing = maybe true (const false)
 
 -- >>> isNothing (nothing :: Maybe.Maybe a) :: Bool.Bool
 -- True
 
 -- | The isJust function returns 'true' iff its argument is of the form @'just' _@.
 isJust :: (MaybeClass m, BoolClass b) => m a -> b
-isJust = maybe false (\x -> true)
+isJust = maybe false (const true)
 
 -- >>> isJust (nothing :: Maybe.Maybe a) :: Bool.Bool
 -- False
 
 -- | The 'Functor' instance for 'MaybeClass'
 maybeFMap :: MaybeClass m => (a -> b) -> m a -> m b
-maybeFMap f ma = maybe nothing (just . f) ma
+maybeFMap f = maybe nothing (just . f)
 
 -- >>> maybeFMap not (just true) :: Maybe.Maybe Bool.Bool
 -- Just False
 
 -- | The 'Monad' instance for 'MaybeClass'
 maybeBind :: MaybeClass m => (a -> m b) -> m a -> m b
-maybeBind k ma = maybe nothing k ma  
+maybeBind f = maybe nothing f
 
-newtype CMaybe a = CMaybe { getCMaybe :: forall b . b -> (a -> b) -> b }
+newtype CMaybe a = CMaybe {getCMaybe :: forall b. b -> (a -> b) -> b}
 
 instance MaybeClass CMaybe where
-  nothing = CMaybe{ getCMaybe = \d f -> d}
-  just x = CMaybe{ getCMaybe = \d f -> f x}
+  nothing = CMaybe (\_nothing _just -> _nothing)
+  just x = CMaybe (\_nothing _just -> _just x)
   maybe n j m = getCMaybe m n j
 
 -- >>> fromMaybe true (just false :: CMaybe CBool)
@@ -81,7 +84,7 @@ instance MaybeClass CMaybe where
 -- CFalse
 
 -- | converting between different instances of 'MaybeClass'
-fromMaybeClass :: (MaybeClass m, MaybeClass n) => m a -> n a 
+fromMaybeClass :: (MaybeClass m, MaybeClass n) => m a -> n a
 fromMaybeClass = maybe nothing just
 
 -- | 'Show' instance for 'CMaybe a' (via transformation into Haskell Maybe)
